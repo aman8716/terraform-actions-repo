@@ -22,7 +22,7 @@ jobs:
       - name: Checkout Terraform Infra Repo
         uses: actions/checkout@v4
         with:
-          repository: <ORG_OR_USERNAME>/EC2_S3_Terraform
+          repository: aman8716/EC2_S3_Terraform
           token: ${{ secrets.INFRA_REPO_TOKEN }}
           path: terraform
  
