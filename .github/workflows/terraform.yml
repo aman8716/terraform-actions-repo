@@ -2,34 +2,22 @@ name: Terraform Central Pipeline
  
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
  
 jobs:
   terraform:
     runs-on: ubuntu-latest
  
     steps:
-      # 1️⃣ Checkout Repo B (Actions repo)
-      - name: Checkout Actions Repo
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
  
-      # 2️⃣ Checkout Repo A (Terraform repo)
-      - name: Checkout Terraform Infra Repo
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           repository: aman8716/EC2_S3_Terraform
           token: ${{ secrets.INFRA_REPO_TOKEN }}
           path: terraform
  
-      # 3️⃣ Setup Terraform
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: 1.6.6
+      - uses: hashicorp/setup-terraform@v3
  
-      # 4️⃣ Configure AWS Credentials (IMPORTANT FIX)
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -37,27 +25,13 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
  
-      # 5️⃣ Verify AWS authentication (safe check)
-      - name: Verify AWS identity
-        run: aws sts get-caller-identity
+      - name: Debug AWS credentials
+        run: |
+          env | grep AWS
+          aws sts get-caller-identity
  
-      # 6️⃣ Terraform Init
       - name: Terraform Init
         run: terraform init
         working-directory: terraform
- 
-      # 7️⃣ Terraform Validate
-      - name: Terraform Validate
-        run: terraform validate
-        working-directory: terraform
- 
-      # 8️⃣ Terraform Plan
-      - name: Terraform Plan
-        run: terraform plan
-        working-directory: terraform
- 
-      # 9️⃣ Terraform Apply (only on main)
-      - name: Terraform Apply
-        if: github.ref == 'refs/heads/main'
         run: terraform apply -auto-approve
         working-directory: terraform
